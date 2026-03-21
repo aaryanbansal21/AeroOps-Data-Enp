@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from typing import List
+import os
 from auth import verify_admin
-from models import TelemetryResponse, NavigationState, MapResponse, EventResponse
+from models import TelemetrySnapshot, NavigationState, MapResponse, EventResponse, Finding, ChartPoint
 from ingestion import mock_db
 import uvicorn
 
@@ -15,9 +18,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/v1/telemetry/latest", response_model=TelemetryResponse, dependencies=[Depends(verify_admin)])
-async def get_telemetry():
-    return mock_db.get_telemetry()
+os.makedirs("static/maps", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Air-Audit API is running! Go to /docs to view the interactive endpoints."}
+
+@app.get("/api/v1/telemetry/snapshot", response_model=TelemetrySnapshot, dependencies=[Depends(verify_admin)])
+async def get_telemetry_snapshot():
+    """Returns the comprehensive real-time robot state and environmental metrics."""
+    return mock_db.get_telemetry_snapshot()
+
+@app.get("/api/v1/findings", response_model=List[Finding], dependencies=[Depends(verify_admin)])
+async def get_findings():
+    """Returns the feed of specific findings/alerts detected by the robot."""
+    return mock_db.get_findings()
+
+@app.get("/api/v1/history", response_model=List[ChartPoint], dependencies=[Depends(verify_admin)])
+async def get_history():
+    """Returns the time-series history required for drawing the bottom chart."""
+    return mock_db.get_history()
 
 @app.get("/api/v1/navigation/state", response_model=NavigationState, dependencies=[Depends(verify_admin)])
 async def get_navigation():
