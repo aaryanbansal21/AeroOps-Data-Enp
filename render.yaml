@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: aeroops-api
+    env: python
+    plan: free
+    # The build script installs the dependencies AND runs the mathematical pipeline
+    # to dynamically generate the 150k point 3D map physically on the backend cloud hardware!
+    buildCommand: "pip install -r requirements.txt && python generate_mock_duct.py"
+    # Uvicorn explicitly binds to the dynamic port injected by Render's routing engines
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
