@@ -12,7 +12,9 @@ The frontend developer can access the following 6 endpoints containing strictly 
 **Payload Schema:**
 - **Context:** `inspection_id`, `inspection_mode`, `site_name`, `asset_id`, `duct_section`
 - **Environment:** `internal_temp_c`, `ambient_temp_c`, `humidity_pct`, `particulate_pm25`, `airflow_mps`, `static_pressure_pa`
+- **Predictive AI Risk Metrics [NEW]:** `voc_index` (Volatile Organic Compounds), `mold_probability_pct`, `aqi_score`
 - **Robot:** `battery_pct`, `motor_current_a`, `vibration_mm_s`, `signal_strength`, `heading_deg`, `tilt_deg`, `robot_speed_mps`, `distance_travelled_m`, `position_m`
+- **Spatial Mapping [NEW]:** `position` (Contains strict `x, y, z` spatial coordinates mapping directly to the 3D `.ply` model), `orientation` (Quaternion `x, y, z, w`)
 - **Risk:** `last_finding_type`, `risk_score`, `risk_band`, `recommended_action`
 - **Time:** `timestamp_ms`
 
@@ -20,11 +22,12 @@ The frontend developer can access the following 6 endpoints containing strictly 
 **Purpose:** Provides the feed of specific anomalies/alerts detected by the robot (the "feed rows").
 **Payload Schema (Array of Objects):**
 - `id`, `type`, `severity` (info|watch|alert), `confidence_pct`, `duct_offset_m`, `note`, `at_ms`
+- **Spatial Mapping [NEW]:** `location` (Contains strict `x, y, z` spatial coordinates so the frontend can natively drop a 3D icon right onto the duct model at the exact site of the anomaly!)
 
 ### 3. `GET /api/v1/history`
 **Purpose:** Time-series history required for drawing the bottom chart.
 **Payload Schema (Array of Objects):**
-- `t` (epoch ms), `battery_pct`, `temp_c`, `vibration`, `airflow`, `current`
+- `t` (epoch ms), `battery_pct`, `temp_c`, `vibration`, `airflow`, `current`, `aqi_score`
 
 ### 4. `GET /api/v1/navigation/state`
 **Purpose:** Minimal legacy state containing quaternion `orientation` and `status` ("MOVING" | "STUCK").
@@ -32,7 +35,7 @@ The frontend developer can access the following 6 endpoints containing strictly 
 ### 5. `GET /api/v1/map/latest`
 **Purpose:** Provides the visual data for the WebGL 3D viewer.
 **Payload Schema:**
-- `point_cloud_url` (Serves the synthetic 80k point `.ply` duct file)
+- `point_cloud_url` (Serves the synthetic 150k point `.ply` duct file)
 - `rgb_image_url`
 
 ### 6. `GET /api/v1/events/poll`

@@ -1,6 +1,6 @@
 from fastapi import Security, HTTPException, status
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
-import jwt
+# (jwt library import removed due to Conda OpenSSL macOS deadlock during fastAPI boot)
 
 # Mock Secrets
 ROBOT_API_KEY = "subpipe-robot-secret-99"

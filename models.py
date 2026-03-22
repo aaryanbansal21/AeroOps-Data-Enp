@@ -1,6 +1,17 @@
 from pydantic import BaseModel
 from typing import Literal, Optional
 
+class Position(BaseModel):
+    x: float
+    y: float
+    z: float
+
+class Orientation(BaseModel):
+    x: float
+    y: float
+    z: float
+    w: float
+
 class TelemetrySnapshot(BaseModel):
     # Identity / context
     inspection_id: str
@@ -9,11 +20,14 @@ class TelemetrySnapshot(BaseModel):
     asset_id: str
     duct_section: str
 
-    # Environment / sensors
+    # Environment / sensors (Upgraded High-Fidelity Data)
     internal_temp_c: float
     ambient_temp_c: float
     humidity_pct: float
     particulate_pm25: float
+    voc_index: float # Volatile Organic Compounds
+    mold_probability_pct: float # AI predicted mold risk
+    aqi_score: int # Air Quality Index 0-500
     airflow_mps: float
     static_pressure_pa: float
 
@@ -26,7 +40,10 @@ class TelemetrySnapshot(BaseModel):
     tilt_deg: float
     robot_speed_mps: float
     distance_travelled_m: float
-    position_m: float
+
+    # 3D Spatial Context (CRITICAL for Dashboard 3D Map Overlay)
+    position: Position
+    orientation: Orientation
 
     # Inspection / risk (display)
     last_finding_type: Optional[str]
@@ -43,6 +60,7 @@ class Finding(BaseModel):
     severity: Literal["info", "watch", "alert"]
     confidence_pct: float
     duct_offset_m: float
+    location: Position # So the frontend can draw a 3D icon right on the 3D WebGL map!
     note: str
     at_ms: int
 
@@ -53,17 +71,7 @@ class ChartPoint(BaseModel):
     vibration: float
     airflow: float
     current: float # motor current
-
-class Position(BaseModel):
-    x: float
-    y: float
-    z: float
-
-class Orientation(BaseModel):
-    x: float
-    y: float
-    z: float
-    w: float
+    aqi_score: int 
 
 class NavigationState(BaseModel):
     timestamp_ms: int
